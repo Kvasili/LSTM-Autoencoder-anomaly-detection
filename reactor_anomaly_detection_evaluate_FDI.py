@@ -1,5 +1,5 @@
 '''
-    @Author:
+    @Author: XXXXXX
 
 
     USAGE
@@ -22,26 +22,14 @@ start = datetime.datetime.now()
 config = {
 
     "model_name": "lstm_autoencoder_FDI.model",
-    "model_normalization": "standard_normalization_FDI.pkl"
+    "model_normalization": "standard_normalization_FDI.pkl",
+    "path_to_data": "./data/FDI_fake_scrams_ch1_ch1cr.csv",
+    "critical_signal": 0
 
 }
 
 
-def find_Null_values(df):
-    '''
-        This function finds Null values in the given dataset
-        across the rows and columns and returns a new dataframe
-        by eliminating the whole row
-        without Null values
-
-    '''
-    df = pd.DataFrame(df)
-    df.dropna(inplace=True)
-
-    return df
-
-
-def load_data_min(filename, cols_to_be_read, percentage):
+def load_data(filename, cols_to_be_read, percentage):
     '''
         This function loads the data from a .csv file to a pandas dataframe. 
         Percentage parameter defines the number of rows to be loaded
@@ -146,8 +134,8 @@ def main():
 
     print("...START TRAINING.....")
 
-    filename_abnormal = './data/FDI_fake_scrams_ch1_ch1cr.csv'
-    df_abnormal_original = load_data_min(
+    filename_abnormal = config["path_to_data"]
+    df_abnormal_original = load_data(
         filename_abnormal, column_names, 1)
     # exclude the last value with manual SCRAM
     df_abnormal = df_abnormal_original.iloc[:, 1:-1]
@@ -159,15 +147,9 @@ def main():
     test_scaled = pd.DataFrame(test_scaled)
     # print(test_scaled.head())
 
-    # print(df_abnormal_original['index'])
-
     test_scaled = pd.concat(
         [df_abnormal_original['index'], test_scaled, df_abnormal_original['manual-scram']], axis=1)
     print(test_scaled.head())
-
-    # print("scaled")
-    # print(test_scaled)
-    # print(test_scaled.shape)
 
     # this creates the dataset in appropriate format but also removes the index column
     testX = to_sequences(test_scaled, seq_size=10)
@@ -177,7 +159,7 @@ def main():
 #     print("****************************************")
 #     # load model
     model = load_model('./models/'+config['model_name'])
-    critical_feature_index = 0
+    critical_feature_index = config['critical_signal']
 
     # # This does not have the manual scram
     testPredict = model.predict(testX[:, :, :-1])
@@ -201,11 +183,6 @@ def main():
     anomaly_df = df_reconstructed[10:].copy()
     print(anomaly_df.shape)
 
-    # anomaly_df.columns = column_names[:-1]
-    # anomaly_df['manual-scram'] = df_abnormal_original.iloc[10:, -1]
-
-    # print(anomaly_df.head())
-
     # the anomaly in every time sequence is defined as the average reconstruction error at each 10s sequence
     anomaly_df['reconstruction_error'] = np.mean(
         test_reconstruction_errors, axis=1)[:-1]
@@ -223,15 +200,9 @@ def main():
     #     1, 5)
     anomaly_df.loc[:, 'anomaly'] = anomaly_df['anomaly'].replace(1, 5)
 
-    # print(anomaly_df.head())
-    # print(anomaly_df.shape)
-
     # # Define the columns you want to plot
     columns_to_plot = ["nfd-1-cps", "rr-position", "ss2-position",
                        "manual-scram", 'anomaly']
-
-    # # Rename 'anomaly_numeric' to 'anomaly' in the dataframe for consistency
-    # anomaly_df = anomaly_df.rename(columns={'anomaly_numeric': 'anomaly'})
 
     colors = {
         "nfd-1-cps": "blue",
@@ -263,12 +234,9 @@ def main():
 if __name__ == "__main__":
     main()
 
-# # '''
-# #     @Author:
-# #     Konstantinos Vasili
+'''
 
+    USAGE
+    python reactor_anomaly_detection_evaluate_FDI.py
 
-# #     USAGE
-# #     python reactor_anomaly_detection_evaluate_FDI.py
-
-# # '''
+'''

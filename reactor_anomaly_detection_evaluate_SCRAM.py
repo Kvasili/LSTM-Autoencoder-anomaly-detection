@@ -1,8 +1,9 @@
 '''
-    @Author:
+    @Author: XXXXX 
 
     USAGE
-    python reactor_anomaly_detection_evaluate.py 
+    python reactor_anomaly_detection_evaluate_SCRAM.py 
+
 
 '''
 import pandas as pd
@@ -20,8 +21,10 @@ start = datetime.datetime.now()
 
 config = {
 
-    "model_name": "lstm_autoencoder_SCRAM.model",
-    "model_normalization": "standard_normalization_SCRAM.pkl"
+    "model_name": "lstm_autoencoder_SCRAM_v2.model",
+    "model_normalization": "standard_normalization_SCRAM_v2.pkl",
+    "paht_to_data": "./data/scram_fake_data_small.csv",
+    "critical_signal": 0
 
 }
 
@@ -63,53 +66,14 @@ def load_data(filename, cols_to_be_read, percentage):
         raise ValueError("values in percentage should be in the range (0, 1]")
 
 
-def load_data_max(filename):
-    '''
-        This function loads the data from a .csv file to a pandas dataframe
-    '''
-    df = pd.read_csv(filename)
-    df = df.loc[:, ['cam_counts', 'cam_volts']]  #
-    # df.dropna(inplace=True)
-    return df
-
-
-def train_test_split(df, percentage):
-    # Function that splits the larger normal dataset into training, testing, and validation
-    split_index = int(len(df) * percentage)
-
-    return df[:split_index], df[split_index:]
-
-
-def normalize_data(train_df, val_df, Monel_name):
-    # Normalize data
-    scaler = MinMaxScaler()
-    # scaler = StandardScaler()
-
-    train_scaled = scaler.fit_transform(train_df)
-    val_scaled = scaler.transform(val_df)
-    # test_df_scaled = scaler.transform(test_df)
-    # Export the Normalized model to be used later
-    joblib.dump(scaler, Monel_name)
-
-    return pd.DataFrame(train_scaled), pd.DataFrame(val_scaled)
-
-
-def plot_data(x, y):
-    plt.plot(x, y)
-    plt.legend()
-    plt.show()
-
-
 def to_sequences(x, seq_size):
     x_values = []
 
     for i in range(len(x)-seq_size):
-        # print(i)
+
         x_values.append(x.iloc[i:(i+seq_size)].values)
 
     return np.array(x_values)
-
-# def Lstm_autoenoder(trainX, trainY, testX):
 
 
 def main():
@@ -118,13 +82,9 @@ def main():
 
     print("...START TRAINING.....")
 
-    # filename_abnormal = 'C:\\Users\\kvasi\\OneDrive - purdue.edu\\projects\\Autonomous Control System\\data\\cam_mixed.csv'
-    filename_abnormal = 'C:\\Users\\kvasi\\OneDrive - purdue.edu\\projects\\time-series-to-image\\csv_data\\scram_fake_data_small.csv'
-
-    df_abnormal_original = load_data(
-        filename_abnormal, column_names, 1)
-    # exclude the last value with manual SCRAM
-    df_abnormal = df_abnormal_original.iloc[:, :-1]
+    filename_abnormal = config["paht_to_data"]
+    df_abnormal = load_data(
+        filename_abnormal, column_names, 0.01)
     print(df_abnormal.head())
 
     # normalize the data
@@ -133,10 +93,6 @@ def main():
     test_scaled = normalization_model.transform(df_abnormal)
     test_scaled = pd.DataFrame(test_scaled)
 
-    # print("scaled")
-    # print(test_scaled)
-    # print(test_scaled.shape)
-
     testX = to_sequences(test_scaled, seq_size=10)
     print('Test X: ')
     print(testX.shape)
@@ -144,7 +100,7 @@ def main():
     print("****************************************")
     # load model
     model = load_model('./models/'+config['model_name'])
-    critical_feature_index = 0
+    critical_feature_index = config["critical_signal"]
 
     testPredict = model.predict(testX)
     print('Predictions: ')
@@ -157,12 +113,9 @@ def main():
     print('Test reconstruntion errors:')
     print(test_reconstruction_errors.shape)
 
-    max_trainMAE = 1.0
+    max_trainMAE = 1.9
     anomaly_df = test_scaled[10:].copy()
-    anomaly_df.columns = column_names[:-1]
-    anomaly_df['manual-scram'] = df_abnormal_original.iloc[10:, -1]
-
-    # print(anomaly_df.head())
+    anomaly_df.columns = column_names
 
     # the anomaly in every time sequence is defined as the average reconstruction error at each 10s sequence
     anomaly_df['reconstruction_error'] = np.mean(
@@ -170,26 +123,20 @@ def main():
 
     anomaly_df['max_trainMAE'] = max_trainMAE
 
+    # Replace the maximum value in column 'A' with 1
+    anomaly_df["manual-scram"].replace(
+        anomaly_df["manual-scram"].max(), 1, inplace=True)
+
+    anomaly_df["manual-scram"].replace(
+        anomaly_df["manual-scram"].min(), 0, inplace=True)
+
     # anomaly is defined as comparison with the reconstructed datapoint
     anomaly_df['anomaly'] = anomaly_df['reconstruction_error'] > anomaly_df['max_trainMAE']
     anomaly_df['anomaly'] = anomaly_df['anomaly'].astype(int)
-    # print(anomaly_df['anomaly_numeric'])
-    num_anomalies = (anomaly_df['anomaly'] == 1).sum()
-    print('**********************************************')
-    print("Number of anomalies:", num_anomalies)
-    # Replace 1s with 1000 in 'anomaly_numeric'
-    anomaly_df['anomaly'] = anomaly_df['anomaly'].replace(
-        1, 5)
-
-    # print(anomaly_df.head())
-    # print(anomaly_df.shape)
 
     # # Define the columns you want to plot
     columns_to_plot = ["nfd-1-cps", "rr-position", "ss2-position",
                        "manual-scram", 'anomaly']
-
-    # # Rename 'anomaly_numeric' to 'anomaly' in the dataframe for consistency
-    # anomaly_df = anomaly_df.rename(columns={'anomaly_numeric': 'anomaly'})
 
     colors = {
         "nfd-1-cps": "blue",
@@ -222,9 +169,6 @@ if __name__ == "__main__":
     main()
 
 '''
-    @Author:
-    Konstantinos Vasili
-
 
     USAGE
     python reactor_anomaly_detection_evaluate_SCRAM.py

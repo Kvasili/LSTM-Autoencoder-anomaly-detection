@@ -1,10 +1,10 @@
 '''
-    @Author:
+    @Author:   XXXXXXX
 
 
 
     USAGE
-    python reactor_anomaly_detection_evaluate.py 
+    python reactor_anomaly_detection_evaluate_CAM.py 
 
 '''
 import pandas as pd
@@ -24,23 +24,11 @@ start = datetime.datetime.now()
 config = {
 
     "model_name": "lstm_autoencoder_CAM.model",
-    "model_normalization": "MinMax_normalization_CAM.pkl"
+    "model_normalization": "MinMax_normalization_CAM.pkl",
+    "path_to_data": './data/CAM_sensor_mixed_data.csv',
+    "critical_signal": 0
 
 }
-
-
-def find_Null_values(df):
-    '''
-        This function finds Null values in the given dataset
-        across the rows and columns and returns a new dataframe
-        by eliminating the whole row
-        without Null values
-
-    '''
-    df = pd.DataFrame(df)
-    df.dropna(inplace=True)
-
-    return df
 
 
 def load_data(filename, cols_to_be_read, percentage):
@@ -66,33 +54,6 @@ def load_data(filename, cols_to_be_read, percentage):
         raise ValueError("values in percentage should be in the range (0, 1]")
 
 
-def train_test_split(df, percentage):
-    # Function that splits the larger normal dataset into training, testing, and validation
-    split_index = int(len(df) * percentage)
-
-    return df[:split_index], df[split_index:]
-
-
-def normalize_data(train_df, val_df, Monel_name):
-    # Normalize data
-    scaler = MinMaxScaler()
-    # scaler = StandardScaler()
-
-    train_scaled = scaler.fit_transform(train_df)
-    val_scaled = scaler.transform(val_df)
-    # test_df_scaled = scaler.transform(test_df)
-    # Export the Normalized model to be used later
-    joblib.dump(scaler, Monel_name)
-
-    return pd.DataFrame(train_scaled), pd.DataFrame(val_scaled)
-
-
-def plot_data(x, y):
-    plt.plot(x, y)
-    plt.legend()
-    plt.show()
-
-
 def to_sequences(x, seq_size):
     x_values = []
 
@@ -110,12 +71,10 @@ def main():
     column_names = ["CAM-CNT", "NFD-1-CPS", "cam-cnt_abnormal"]  #
 
     print("...START TRAINING.....")
-
-    # filename_abnormal = 'C:\\Users\\kvasi\\OneDrive - purdue.edu\\projects\\Autonomous Control System\\data\\cam_mixed.csv'
-    filename_abnormal = './data/CAM_sensor_mixed_data.csv'
+    filename_abnormal = config['path_to_data']
 
     df_abnormal = load_data(
-        filename_abnormal, column_names, 0.5)
+        filename_abnormal, column_names, 0.1)
 
     print(df_abnormal.head())
     print('Mix data shape: ')
@@ -136,7 +95,7 @@ def main():
     # print("****************************************")
     # # load model
     model = load_model('./models/'+config['model_name'])
-    critical_feature_index = 0
+    critical_feature_index = config['critical_signal']
 
     testPredict = model.predict(testX)
     print('Predictions: ')
@@ -193,14 +152,8 @@ def main():
     anomaly_df['anomaly'] = anomaly_df['anomaly'].replace(
         1, 10000)
 
-    # print(anomaly_df.head())
-    # print(anomaly_df.shape)
-
     # # Define the columns you want to plot
     columns_to_plot = ["anomaly", "CAM-CNT", "NFD-1-CPS"]
-
-    # # Rename 'anomaly_numeric' to 'anomaly' in the dataframe for consistency
-    # anomaly_df = anomaly_df.rename(columns={'anomaly_numeric': 'anomaly'})
 
     colors = {
         "CAM-CNT": "blue",
@@ -231,10 +184,6 @@ if __name__ == "__main__":
     main()
 
 '''
-    @Author:
-    Konstantinos Vasili
-
-
     USAGE
     python reactor_anomaly_detection_evaluate_CAM.py
 
