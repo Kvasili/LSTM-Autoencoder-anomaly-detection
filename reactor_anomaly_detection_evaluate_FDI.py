@@ -1,6 +1,5 @@
 '''
     @Author:
-    Konstantinos Vasili
 
 
     USAGE

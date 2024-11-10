@@ -1,7 +1,5 @@
 '''
     @Author:
-    Konstantinos Vasili
-
 
     USAGE
     python reactor_anomaly_detection_evaluate.py 
