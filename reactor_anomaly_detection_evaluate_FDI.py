@@ -52,33 +52,6 @@ def load_data(filename, cols_to_be_read, percentage):
         raise ValueError("values in percentage should be in the range (0, 1]")
 
 
-def train_test_split(df, percentage):
-    # Function that splits the larger normal dataset into training, testing, and validation
-    split_index = int(len(df) * percentage)
-
-    return df[:split_index], df[split_index:]
-
-
-def normalize_data(train_df, val_df, Monel_name):
-    # Normalize data
-    scaler = MinMaxScaler()
-    # scaler = StandardScaler()
-
-    train_scaled = scaler.fit_transform(train_df)
-    val_scaled = scaler.transform(val_df)
-    # test_df_scaled = scaler.transform(test_df)
-    # Export the Normalized model to be used later
-    joblib.dump(scaler, Monel_name)
-
-    return pd.DataFrame(train_scaled), pd.DataFrame(val_scaled)
-
-
-def plot_data(x, y):
-    plt.plot(x, y)
-    plt.legend()
-    plt.show()
-
-
 def to_sequences(x, seq_size):
     x_values = []
     index_values = x["index"]
