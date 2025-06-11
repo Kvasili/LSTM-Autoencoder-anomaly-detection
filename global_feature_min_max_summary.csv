@@ -1,0 +1,68 @@
+Feature,Min,Max
+adj neg air pressure raw,1.0895,1.8528
+adj neg air pressure,0.0112,0.1066
+current alarm mode,1.0,1.0
+cont air counts raw,0.0781,2.5449
+cont air counts,1.197,350.7021
+makeup wtr cond down raw,0.771,2.1023
+makeup wtr cond down,0.7468,1.1023
+makeup wtr cond up raw,2.1845,2.7422
+makeup wtr cond up,1.1845,1.7422
+makeup wtr temp down,19.026,27.9561
+makeup wtr temp down raw,1.761,2.1182
+makeup wtr temp up,18.6568,27.5497
+makeup wtr temp up raw,1.7463,2.102
+DAS health index,100.0,100.0
+0-15 channel error,0.0,0.0
+16-31 channel error status,0.0,0.0
+error detection status 2,0.0,0.0
+card temperature 2,23.0,29.625
+error detection status 3,0.0,2.0
+card temperature 3,24.25,30.875
+error detection status 4,0.0,0.0
+card temperature 4,24.25,30.625
+error detection status 5,0.0,0.0
+card temperature 5,23.25,29.75
+fc positioning 10V supply,10.0,10.0
+fiss-active-state,0.0,0.0
+fiss-position,-0.072,3.2473
+mag-current,0.0054,54.0809
+mag-current-raw,0.0005,5.4079
+mstat,2.0,2.0
+nfd-1-cps,3.1795,40120000.0
+nfd-1cps-raw,1.2009,4.0414
+nfd-1-cr,-3.3241,7.6912
+nfd-1-cr-raw,1.001,2.2027
+nfd-2-cr,-3.3195,2.3632
+nfd-2-cr-raw,1.0015,1.6214
+nfd-2-log,1e-05,97.8046
+nfd-2-log-raw,1.0001,4.7396
+nfd-3-pwr,4.989e-05,100.086
+nfd-3-pwr-raw,1.6685,3.6711
+nfd-3-pwr-rng,1.0,13.0
+nfd-4-flux,0.0083,100.1867
+nfd-4-flux-raw,1.001,3.6716
+ram-con-lvl,0.0103,0.4858
+rom-con-lvl-raw,1.2346,2.9083
+ram-pool-lvl,0.0047,9.0546
+ram-pool-lvl-raw,0.8934,4.1787
+ram-wtr-lvl,0.0164,0.1408
+ram-wtr-lvl-raw,1.4354,2.3705
+rcs-scram-rel-q,0.0,0.0
+rcs-scram-st-q,0.0,0.0
+rr-active-state,0.0,256.0
+rr-position,-0.1674,60.0226
+rtpbtempa_00,23.0,30.0
+rtpbtempb_00,23.0,29.0
+rtpctempa_00,36.0,42.0
+rtpctempb_00,35.0,42.0
+rtphactcnta_00,11.0,19.0
+rtphactcntb_00,0.0,2.0
+src-active-state,0.0,2.0
+src-position,0.0,183.0
+ss1-active-state,0.0,256.0
+ss1-position,-0.0534,62.5913
+ss2-active-state,0.0,256.0
+ss2-position,-0.0055,53.8677
+ack-button,0.0,1.0
+manual-scram,0.0,1.0
